@@ -1,0 +1,158 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import {
+  Layers,
+  Lock,
+  Mail,
+  User,
+  ArrowRight,
+  AlertCircle,
+  CheckCircle2,
+  ShieldCheck
+} from 'lucide-react';
+
+function RegisterForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect') || '/';
+
+  const { register } = useAuth();
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setIsLoading(true);
+
+    const res = await register(email, password, fullName);
+    setIsLoading(false);
+
+    if (res.success) {
+      router.push(redirectPath);
+    } else {
+      setErrorMessage(res.error || 'Pendaftaran gagal');
+    }
+  };
+
+  return (
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md space-y-6">
+        <div className="text-center space-y-2">
+          <div className="inline-flex w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+            <Layers className="w-6 h-6" />
+          </div>
+          <h1 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">
+            Buat Akun Baru
+          </h1>
+          <p className="text-xs text-zinc-500">
+            Daftar untuk mulai belanja produk digital & fisik dengan keamanan Supabase
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 sm:p-8 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xl space-y-5">
+          {errorMessage && (
+            <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+            <div>
+              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                Nama Lengkap
+              </label>
+              <div className="relative flex items-center">
+                <User className="w-4 h-4 absolute left-3.5 text-zinc-400" />
+                <input
+                  type="text"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Nama Lengkap Anda"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                Alamat Email
+              </label>
+              <div className="relative flex items-center">
+                <Mail className="w-4 h-4 absolute left-3.5 text-zinc-400" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="nama@email.com"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                Password
+              </label>
+              <div className="relative flex items-center">
+                <Lock className="w-4 h-4 absolute left-3.5 text-zinc-400" />
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Minimal 6 karakter"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition disabled:opacity-50"
+            >
+              {isLoading ? (
+                <span>Mendaftarkan ke Supabase...</span>
+              ) : (
+                <>
+                  <span>Daftar Akun</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 text-center text-xs text-zinc-500">
+            Sudah punya akun?{' '}
+            <Link
+              href={`/login?redirect=${redirectPath}`}
+              className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
+              Masuk di Sini
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-[85vh] flex items-center justify-center text-xs text-zinc-500">Memuat Halaman Pendaftaran...</div>}>
+      <RegisterForm />
+    </React.Suspense>
+  );
+}

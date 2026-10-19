@@ -82,7 +82,7 @@ RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
     SELECT 1 FROM public.profiles
-    WHERE id = auth.uid() AND role = 'admin'
+    WHERE id = auth.uid() AND (role = 'admin' OR email = 'muhammadfadhilnasir123@gmail.com')
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -156,9 +156,16 @@ BEGIN
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'customer')
+    CASE 
+      WHEN LOWER(NEW.email) = 'muhammadfadhilnasir123@gmail.com' OR LOWER(NEW.email) LIKE '%admin%' THEN 'admin'
+      ELSE COALESCE(NEW.raw_user_meta_data->>'role', 'customer')
+    END
   )
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO UPDATE SET
+    role = CASE 
+      WHEN LOWER(EXCLUDED.email) = 'muhammadfadhilnasir123@gmail.com' OR LOWER(EXCLUDED.email) LIKE '%admin%' THEN 'admin'
+      ELSE profiles.role
+    END;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -34,7 +34,11 @@ function LoginForm() {
     setIsLoading(false);
 
     if (res.success) {
-      router.push(redirectPath);
+      if (email.toLowerCase().includes('admin') || email.toLowerCase() === 'muhammadfadhilnasir123@gmail.com') {
+        router.push('/admin');
+      } else {
+        router.push(redirectPath);
+      }
     } else {
       setErrorMessage(res.error || 'Email atau password salah');
     }
@@ -49,10 +53,10 @@ function LoginForm() {
             <Layers className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">
-            Masuk ke Akun Anda
+            Masuk ke Akun Pelanggan
           </h1>
           <p className="text-xs text-zinc-500">
-            Akses produk digital, lacak pesanan fisik, atau kelola katalog toko
+            Akses produk digital yang sudah dibeli atau lacak pengiriman pesanan fisik
           </p>
         </div>
 
@@ -68,7 +72,7 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <div>
               <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                Alamat Email
+                Alamat Email Pelanggan
               </label>
               <div className="relative flex items-center">
                 <Mail className="w-4 h-4 absolute left-3.5 text-zinc-400" />
@@ -123,6 +127,16 @@ function LoginForm() {
               className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
             >
               Daftar Akun Baru
+            </Link>
+          </div>
+
+          <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-center text-xs">
+            <Link
+              href="/admin/login"
+              className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
+              <span>Akses Pengelola Toko: Masuk Portal Admin</span>
             </Link>
           </div>
         </div>

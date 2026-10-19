@@ -4,6 +4,20 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 import { UserProfile } from '@/lib/types';
 
+// List of official administrator emails that have full access to the store management panel
+export const ADMIN_EMAILS: string[] = [
+  'muhammadfadhilnasir123@gmail.com',
+  'admin@fadhilstore.com'
+];
+
+export const isUserAdmin = (email?: string | null, role?: string | null): boolean => {
+  if (!email && !role) return false;
+  const cleanEmail = (email || '').trim().toLowerCase();
+  if (role === 'admin') return true;
+  if (cleanEmail.includes('admin')) return true;
+  return ADMIN_EMAILS.some((adm) => adm.toLowerCase() === cleanEmail);
+};
+
 interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
@@ -38,13 +52,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               .from('profiles')
               .select('full_name, role')
               .eq('id', session.user.id)
-              .single();
+              .maybeSingle();
+
+            const isAdm = isUserAdmin(session.user.email, profile?.role);
+            const role: 'admin' | 'customer' = isAdm ? 'admin' : (profile?.role === 'admin' ? 'admin' : 'customer');
+
+            // If user has admin email but Supabase profile role is not admin yet, sync it
+            if (isAdm && profile && profile.role !== 'admin') {
+              supabase.from('profiles').update({ role: 'admin' }).eq('id', session.user.id).then();
+            }
 
             setUser({
               id: session.user.id,
               email: session.user.email || '',
               full_name: profile?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
-              role: profile?.role || (session.user.email?.includes('admin') ? 'admin' : 'customer')
+              role
             });
           } else {
             setUser(null);
@@ -57,13 +79,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .from('profiles')
                 .select('full_name, role')
                 .eq('id', session.user.id)
-                .single();
+                .maybeSingle();
+
+              const isAdm = isUserAdmin(session.user.email, profile?.role);
+              const role: 'admin' | 'customer' = isAdm ? 'admin' : (profile?.role === 'admin' ? 'admin' : 'customer');
+
+              if (isAdm && profile && profile.role !== 'admin') {
+                supabase.from('profiles').update({ role: 'admin' }).eq('id', session.user.id).then();
+              }
 
               setUser({
                 id: session.user.id,
                 email: session.user.email || '',
                 full_name: profile?.full_name || session.user.user_metadata?.full_name,
-                role: profile?.role || (session.user.email?.includes('admin') ? 'admin' : 'customer')
+                role
               });
             } else {
               setUser(null);
@@ -121,13 +150,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .from('profiles')
             .select('full_name, role')
             .eq('id', data.user.id)
-            .single();
+            .maybeSingle();
+
+          const isAdm = isUserAdmin(data.user.email || email, profile?.role);
+          const role: 'admin' | 'customer' = isAdm ? 'admin' : (profile?.role === 'admin' ? 'admin' : 'customer');
+
+          if (isAdm && profile && profile.role !== 'admin') {
+            await supabase.from('profiles').update({ role: 'admin' }).eq('id', data.user.id);
+          }
 
           const usr: UserProfile = {
             id: data.user.id,
             email: data.user.email || email,
             full_name: profile?.full_name || data.user.user_metadata?.full_name || email.split('@')[0],
-            role: profile?.role || (email.toLowerCase().includes('admin') ? 'admin' : 'customer')
+            role
           };
           setUser(usr);
           setIsLoading(false);
@@ -140,8 +176,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // Demo/Local login fallback
-    const role: 'admin' | 'customer' = email.toLowerCase().includes('admin') ? 'admin' : 'customer';
+    // Local login fallback
+    const isAdm = isUserAdmin(email);
+    const role: 'admin' | 'customer' = isAdm ? 'admin' : 'customer';
     const mockUser: UserProfile = {
       id: `usr-${Date.now()}`,
       email,
@@ -165,7 +202,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (supabase) {
       try {
-        const role = email.toLowerCase().includes('admin') ? 'admin' : 'customer';
+        const isAdm = isUserAdmin(email);
+        const role: 'admin' | 'customer' = isAdm ? 'admin' : 'customer';
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -200,8 +238,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // Demo/Local register fallback
-    const role: 'admin' | 'customer' = email.toLowerCase().includes('admin') ? 'admin' : 'customer';
+    // Local register fallback
+    const isAdm = isUserAdmin(email);
+    const role: 'admin' | 'customer' = isAdm ? 'admin' : 'customer';
     const mockUser: UserProfile = {
       id: `usr-${Date.now()}`,
       email,
@@ -228,7 +267,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user ? isUserAdmin(user.email, user.role) : false;
 
   return (
     <AuthContext.Provider

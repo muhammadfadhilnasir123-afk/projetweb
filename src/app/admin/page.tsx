@@ -193,7 +193,7 @@ export default function AdminPage() {
   });
 
   // Access check
-  if (!user || user.role !== 'admin') {
+  if (!user || !isAdmin) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
         <div className="w-16 h-16 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4">
@@ -202,15 +202,15 @@ export default function AdminPage() {
         <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
           Akses Khusus Administrator
         </h2>
-        <p className="text-xs text-zinc-500 mt-2 mb-6">
-          Halaman ini khusus untuk admin toko FadhilStore untuk mengelola inventaris produk dan pesanan pembeli.
+        <p className="text-xs text-zinc-500 mt-2 mb-6 leading-relaxed">
+          Halaman ini khusus untuk administrator resmi (<b>muhammadfadhilnasir123@gmail.com</b>) untuk mengelola inventaris produk dan pesanan toko.
         </p>
         <div className="space-y-3">
           <Link
-            href="/login?redirect=/admin"
+            href="/admin/login"
             className="block w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md"
           >
-            Masuk sebagai Administrator
+            Masuk ke Portal Administrator
           </Link>
           <Link
             href="/"

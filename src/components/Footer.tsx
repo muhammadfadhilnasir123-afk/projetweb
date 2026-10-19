@@ -80,8 +80,8 @@ export const Footer: React.FC = () => {
           <ul className="space-y-2 text-xs text-zinc-400">
             <li><Link href="/orders" className="hover:text-white transition">Lacak & Riwayat Pesanan</Link></li>
             <li><Link href="/cart" className="hover:text-white transition">Keranjang Belanja</Link></li>
-            <li><Link href="/admin" className="hover:text-white transition">Dashboard Admin</Link></li>
-            <li><Link href="/login" className="hover:text-white transition">Masuk Akun</Link></li>
+            <li><Link href="/admin/login" className="hover:text-amber-300 text-zinc-300 transition font-medium">Portal Administrator 🔒</Link></li>
+            <li><Link href="/login" className="hover:text-white transition">Masuk Akun Pelanggan</Link></li>
             <li><Link href="/register" className="hover:text-white transition">Daftar Akun Baru</Link></li>
           </ul>
         </div>

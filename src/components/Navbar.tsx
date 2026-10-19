@@ -39,12 +39,24 @@ export const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="text-[11px] text-zinc-300 hover:text-white transition"
-            >
-              FadhilStore Official
-            </Link>
+            {isAdmin ? (
+              <Link
+                href="/admin"
+                className="text-[11px] bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-0.5 rounded-full flex items-center gap-1.5 font-semibold transition shadow-sm"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-300" />
+                <span>Panel Pengelolaan Toko (Admin)</span>
+              </Link>
+            ) : (
+              <Link
+                href="/admin/login"
+                className="text-[11px] text-zinc-300 hover:text-white hover:bg-white/10 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition font-medium border border-white/20"
+                title="Portal Khusus Administrator Toko"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Masuk sebagai Admin</span>
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -263,6 +275,15 @@ export const Navbar: React.FC = () => {
               className="block px-3 py-2 rounded-lg text-sm font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             >
               Pesanan Saya
+            </Link>
+          )}
+          {!isAdmin && (
+            <Link
+              href="/admin/login"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              🛡️ Masuk sebagai Administrator
             </Link>
           )}
         </div>

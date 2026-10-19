@@ -22,7 +22,7 @@ import {
 
 export const Navbar: React.FC = () => {
   const { totalItems, setIsCartDrawerOpen } = useCart();
-  const { user, isAdmin, isSupabaseConnected, logout, loginAsDemo } = useAuth();
+  const { user, isAdmin, logout, loginAsDemo } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDemoMenuOpen, setIsDemoMenuOpen] = useState(false);
@@ -41,13 +41,6 @@ export const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Supabase Status Indicator */}
-            <div className="flex items-center gap-1.5 bg-white/10 px-2.5 py-0.5 rounded-full text-[11px]">
-              <span className={`w-1.5 h-1.5 rounded-full ${isSupabaseConnected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-              <span className="text-zinc-300">
-                {isSupabaseConnected ? 'Supabase Terhubung' : 'Demo Mode (Local DB)'}
-              </span>
-            </div>
 
             {/* Quick Demo Switcher */}
             <div className="relative">

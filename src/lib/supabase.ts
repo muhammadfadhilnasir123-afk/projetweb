@@ -122,6 +122,16 @@ const INITIAL_DEMO_ORDERS: Order[] = [
   }
 ];
 
+// Helper to normalize product categories to the current unified categories
+export function normalizeCategory(cat: string): string {
+  if (!cat) return 'E-Book & Panduan Praktis';
+  if (cat === 'E-Book') return 'E-Book & Panduan Praktis';
+  if (cat === 'Template UI' || cat === 'Preset' || cat === 'Source Code') return 'Template & Aset Digital';
+  if (cat === 'Merchandise') return 'Pakaian Nyaman (Fashion)';
+  if (cat === 'Aksesoris & Gadget') return 'Aksesoris & Kebutuhan Harian';
+  return cat;
+}
+
 // Helper to get local mock items
 function getLocalProducts(): Product[] {
   if (typeof window === 'undefined') return INITIAL_PRODUCTS;
@@ -131,7 +141,16 @@ function getLocalProducts(): Product[] {
       localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
       return INITIAL_PRODUCTS;
     }
-    return JSON.parse(raw);
+    const parsed: Product[] = JSON.parse(raw);
+    const updated = parsed.map((p) => ({
+      ...p,
+      category: normalizeCategory(p.category)
+    }));
+    const hasChanges = updated.some((p, i) => p.category !== parsed[i]?.category);
+    if (hasChanges) {
+      localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(updated));
+    }
+    return updated;
   } catch {
     return INITIAL_PRODUCTS;
   }
@@ -173,7 +192,10 @@ export async function fetchProducts(): Promise<Product[]> {
         .order('created_at', { ascending: false });
 
       if (!error && data && data.length > 0) {
-        return data as Product[];
+        return (data as Product[]).map((p) => ({
+          ...p,
+          category: normalizeCategory(p.category)
+        }));
       }
     } catch (err) {
       console.warn('Gagal fetch dari Supabase, beralih ke cache lokal:', err);
@@ -193,7 +215,11 @@ export async function fetchProductById(id: string): Promise<Product | null> {
         .single();
 
       if (!error && data) {
-        return data as Product;
+        const prod = data as Product;
+        return {
+          ...prod,
+          category: normalizeCategory(prod.category)
+        };
       }
     } catch (err) {
       console.warn('Gagal fetch detail dari Supabase, cek lokal:', err);

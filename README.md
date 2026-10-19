@@ -1,6 +1,6 @@
 # FadhilStore - E-Commerce & Katalog Produk Digital & Fisik
 
-Aplikasi web modern untuk katalog dan e-commerce produk digital (E-Book, Template UI, Preset, Source Code) serta produk fisik (Apparel, Gadget, Aksesoris) yang dibangun menggunakan **Next.js (App Router)**, **Tailwind CSS**, **TypeScript**, dan terintegrasi dengan **Supabase** (Database PostgreSQL & Autentikasi).
+Aplikasi web modern untuk katalog dan e-commerce produk digital serta produk fisik yang dibangun menggunakan **Next.js (App Router)**, **Tailwind CSS**, **TypeScript**, dan terintegrasi dengan **Supabase** (Database PostgreSQL & Autentikasi).
 
 ---
 
@@ -14,10 +14,10 @@ Aplikasi web modern untuk katalog dan e-commerce produk digital (E-Book, Templat
 
 ### 2. Katalog & Etalase Produk Interaktif (`/`)
 - **Dukungan Produk Ganda**:
-  - ⚡ **Produk Digital**: Akses unduhan instan langsung pada faktur (E-Book, Figma Kit, Preset, Source Code).
+  - ⚡ **Produk Digital**: Akses unduhan instan langsung pada faktur (E-Book, Template, Aset Digital).
   - 📦 **Produk Fisik**: Membutuhkan alamat pengiriman lengkap, pemilihan kurir, dan pelacakan status gudang.
 - **Pencarian Instan (Instant Search)**: Cari produk langsung berdasarkan judul atau deskripsi tanpa reload halaman.
-- **Filter Kategori Dinamis**: Filter cepat *Semua, Produk Digital, Produk Fisik*, serta kategori khusus (*E-Book, Template UI, Preset, Source Code, Merchandise, Aksesoris*).
+- **Filter Kategori Dinamis**: Filter cepat *Semua, Produk Digital, Produk Fisik*, serta kategori terpadu (*E-Book & Panduan Praktis, Template & Aset Digital, Pakaian Nyaman (Fashion), Aksesoris & Kebutuhan Harian*).
 - **Pengurutan (Sort)**: Berdasarkan popularitas, harga terendah, harga tertinggi, dan rating bintang.
 - **Modal Detail Cepat (Quick View Modal)**: Pratinjau spesifikasi dan fitur produk tanpa meninggalkan etalase.
 

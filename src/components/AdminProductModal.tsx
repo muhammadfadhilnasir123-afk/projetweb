@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Product, ProductType } from '@/lib/types';
+import { DEFAULT_PRODUCT_CATEGORIES } from '@/lib/products-data';
 import { slugify } from '@/lib/utils';
 import { X, Sparkles, Image as ImageIcon, Save, Check } from 'lucide-react';
 
@@ -10,18 +11,20 @@ interface AdminProductModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (productData: Omit<Product, 'id'> | Product) => Promise<void>;
+  categories?: string[];
 }
 
 export const AdminProductModal: React.FC<AdminProductModalProps> = ({
   product,
   isOpen,
   onClose,
-  onSave
+  onSave,
+  categories = []
 }) => {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [price, setPrice] = useState<number>(100000);
-  const [category, setCategory] = useState('E-Book');
+  const [category, setCategory] = useState('E-Book & Panduan Praktis');
   const [productType, setProductType] = useState<ProductType>('digital');
   const [imageUrl, setImageUrl] = useState('');
   const [downloadUrl, setDownloadUrl] = useState('');
@@ -49,7 +52,7 @@ export const AdminProductModal: React.FC<AdminProductModalProps> = ({
       setTitle('');
       setSlug('');
       setPrice(150000);
-      setCategory('E-Book');
+      setCategory('E-Book & Panduan Praktis');
       setProductType('digital');
       setImageUrl('https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80');
       setDownloadUrl('');
@@ -67,17 +70,44 @@ export const AdminProductModal: React.FC<AdminProductModalProps> = ({
     }
   };
 
+  const handleCategoryChange = (val: string) => {
+    setCategory(val);
+    const matched = DEFAULT_PRODUCT_CATEGORIES.find((dc) => dc.name === val);
+    if (matched) {
+      setProductType(matched.type);
+      if (matched.type === 'digital' && stock < 9999 && !product) {
+        setStock(9999);
+      } else if (matched.type === 'physical' && stock === 9999) {
+        setStock(25);
+      }
+    } else if (val === 'Digital Lainnya') {
+      setProductType('digital');
+      if (stock < 9999 && !product) setStock(9999);
+    } else if (val === 'Fisik Lainnya') {
+      setProductType('physical');
+      if (stock === 9999) setStock(25);
+    }
+  };
+
   const handleTypeChange = (type: ProductType) => {
     setProductType(type);
     if (type === 'digital') {
-      setStock(9999);
-      if (!category || category === 'Merchandise' || category === 'Aksesoris & Gadget') {
-        setCategory('E-Book');
+      if (stock < 9999 && !product) setStock(9999);
+      const isCurrentlyPhysical =
+        category === 'Pakaian Nyaman (Fashion)' ||
+        category === 'Aksesoris & Kebutuhan Harian' ||
+        category === 'Fisik Lainnya';
+      if (!category || isCurrentlyPhysical) {
+        setCategory('E-Book & Panduan Praktis');
       }
     } else {
       if (stock === 9999) setStock(25);
-      if (category === 'E-Book' || category === 'Template UI' || category === 'Preset') {
-        setCategory('Merchandise');
+      const isCurrentlyDigital =
+        category === 'E-Book & Panduan Praktis' ||
+        category === 'Template & Aset Digital' ||
+        category === 'Digital Lainnya';
+      if (!category || isCurrentlyDigital) {
+        setCategory('Pakaian Nyaman (Fashion)');
       }
     }
   };
@@ -151,12 +181,12 @@ export const AdminProductModal: React.FC<AdminProductModalProps> = ({
                   onClick={() => handleTypeChange('digital')}
                   className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition ${
                     productType === 'digital'
-                      ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 font-bold'
-                      : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
+                      ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 font-bold ring-2 ring-emerald-500/20'
+                      : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                   }`}
                 >
                   <span className="text-sm">⚡ Produk Digital</span>
-                  <span className="text-[10px] text-zinc-500">E-Book, UI Kit, Preset, Source Code</span>
+                  <span className="text-[10px] text-zinc-500">E-Book & Panduan Praktis, Template & Aset Digital</span>
                 </button>
 
                 <button
@@ -164,12 +194,12 @@ export const AdminProductModal: React.FC<AdminProductModalProps> = ({
                   onClick={() => handleTypeChange('physical')}
                   className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition ${
                     productType === 'physical'
-                      ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 font-bold'
-                      : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
+                      ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 font-bold ring-2 ring-blue-500/20'
+                      : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                   }`}
                 >
                   <span className="text-sm">📦 Produk Fisik</span>
-                  <span className="text-[10px] text-zinc-500">Keyboard, Kaos, Tumbler, Biji Kopi</span>
+                  <span className="text-[10px] text-zinc-500">Pakaian Nyaman (Fashion), Aksesoris & Kebutuhan Harian</span>
                 </button>
               </div>
             </div>
@@ -208,31 +238,70 @@ export const AdminProductModal: React.FC<AdminProductModalProps> = ({
             {/* Category & Price & Stock */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                  Kategori *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-semibold text-zinc-700 dark:text-zinc-300">
+                    Kategori *
+                  </label>
+                  <span
+                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                      productType === 'digital'
+                        ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400'
+                    }`}
+                  >
+                    {productType === 'digital' ? '⚡ Digital' : '📦 Fisik'}
+                  </span>
+                </div>
                 <select
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none font-medium"
                 >
-                  {productType === 'digital' ? (
-                    <>
-                      <option value="E-Book">E-Book</option>
-                      <option value="Template UI">Template UI</option>
-                      <option value="Preset">Preset</option>
-                      <option value="Source Code">Source Code</option>
-                      <option value="Digital Lainnya">Digital Lainnya</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="Merchandise">Merchandise</option>
-                      <option value="Aksesoris & Gadget">Aksesoris & Gadget</option>
-                      <option value="Fashion">Fashion</option>
-                      <option value="Fisik Lainnya">Fisik Lainnya</option>
-                    </>
+                  <optgroup label="⚡ Produk Digital">
+                    <option value="E-Book & Panduan Praktis">E-Book & Panduan Praktis</option>
+                    <option value="Template & Aset Digital">Template & Aset Digital</option>
+                    <option value="Digital Lainnya">Digital Lainnya</option>
+                  </optgroup>
+                  <optgroup label="📦 Produk Fisik">
+                    <option value="Pakaian Nyaman (Fashion)">Pakaian Nyaman (Fashion)</option>
+                    <option value="Aksesoris & Kebutuhan Harian">Aksesoris & Kebutuhan Harian</option>
+                    <option value="Fisik Lainnya">Fisik Lainnya</option>
+                  </optgroup>
+                  {categories.filter(
+                    (c) =>
+                      ![
+                        'E-Book & Panduan Praktis',
+                        'Template & Aset Digital',
+                        'Digital Lainnya',
+                        'Pakaian Nyaman (Fashion)',
+                        'Aksesoris & Kebutuhan Harian',
+                        'Fisik Lainnya'
+                      ].includes(c)
+                  ).length > 0 && (
+                    <optgroup label="Kategori Tersedia Lainnya">
+                      {categories
+                        .filter(
+                          (c) =>
+                            ![
+                              'E-Book & Panduan Praktis',
+                              'Template & Aset Digital',
+                              'Digital Lainnya',
+                              'Pakaian Nyaman (Fashion)',
+                              'Aksesoris & Kebutuhan Harian',
+                              'Fisik Lainnya'
+                            ].includes(c)
+                        )
+                        .map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                    </optgroup>
                   )}
                 </select>
+                <p className="text-[10px] text-zinc-400 mt-1">
+                  * Kategori otomatis menyinkronkan tipe digital / fisik
+                </p>
               </div>
 
               <div>

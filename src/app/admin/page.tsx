@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -54,6 +54,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [productSearch, setProductSearch] = useState('');
   const [productTypeFilter, setProductTypeFilter] = useState<'all' | 'digital' | 'physical'>('all');
+  const [productCategoryFilter, setProductCategoryFilter] = useState<string>('all');
 
   // Modal State
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -145,6 +146,23 @@ export default function AdminPage() {
     return true;
   });
 
+  // Unique categories list for admin
+  const adminAvailableCategories = useMemo(() => {
+    const defaultList = [
+      'E-Book & Panduan Praktis',
+      'Template & Aset Digital',
+      'Pakaian Nyaman (Fashion)',
+      'Aksesoris & Kebutuhan Harian'
+    ];
+    const fromProducts = Array.from(new Set(products.map((p) => p.category)));
+    fromProducts.forEach((cat) => {
+      if (!defaultList.includes(cat)) {
+        defaultList.push(cat);
+      }
+    });
+    return defaultList;
+  }, [products]);
+
   // Filtered products
   const filteredProducts = products.filter((prod) => {
     if (productSearch.trim()) {
@@ -154,6 +172,9 @@ export default function AdminPage() {
       if (!matchTitle && !matchCat) return false;
     }
     if (productTypeFilter !== 'all' && prod.product_type !== productTypeFilter) {
+      return false;
+    }
+    if (productCategoryFilter !== 'all' && prod.category !== productCategoryFilter) {
       return false;
     }
     return true;
@@ -504,17 +525,35 @@ export default function AdminPage() {
               />
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-zinc-400 font-medium">Tipe:</span>
-              <select
-                value={productTypeFilter}
-                onChange={(e) => setProductTypeFilter(e.target.value as any)}
-                className="px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-xs font-semibold focus:outline-none"
-              >
-                <option value="all">Semua Tipe</option>
-                <option value="digital">Hanya Digital</option>
-                <option value="physical">Hanya Fisik</option>
-              </select>
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-zinc-400 font-medium">Tipe:</span>
+                <select
+                  value={productTypeFilter}
+                  onChange={(e) => setProductTypeFilter(e.target.value as any)}
+                  className="px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-xs font-semibold focus:outline-none"
+                >
+                  <option value="all">Semua Tipe</option>
+                  <option value="digital">Hanya Digital</option>
+                  <option value="physical">Hanya Fisik</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-zinc-400 font-medium">Kategori:</span>
+                <select
+                  value={productCategoryFilter}
+                  onChange={(e) => setProductCategoryFilter(e.target.value)}
+                  className="px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-xs font-semibold focus:outline-none"
+                >
+                  <option value="all">Semua Kategori</option>
+                  {adminAvailableCategories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -659,6 +698,7 @@ export default function AdminPage() {
           setEditingProduct(null);
         }}
         onSave={handleSaveProduct}
+        categories={adminAvailableCategories}
       />
     </div>
   );

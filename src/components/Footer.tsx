@@ -39,9 +39,9 @@ export const Footer: React.FC = () => {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-semibold text-white text-sm">Supabase Secured Database</h4>
+              <h4 className="font-semibold text-white text-sm">Harga Jual Terjangkau</h4>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Transaksi dilindungi Row Level Security (RLS) dan autentikasi terenkripsi.
+                Nikmati berbagai produk pilihan dengan harga terbaik dan terjangkau
               </p>
             </div>
           </div>
@@ -60,25 +60,18 @@ export const Footer: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-zinc-400 leading-relaxed">
-            Platform katalog dan e-commerce modern untuk produk digital (E-Book, UI Kit, Source Code, Presets) serta produk fisik berkualitas pilihan di Indonesia.
+            Platform katalog dan e-commerce modern terpercaya di Indonesia yang menyediakan koleksi e-book bermanfaat, pakaian sehari-hari berkualitas, serta berbagai produk fisik dan digital pilihan.
           </p>
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
-            <span>Dibangun dengan</span>
-            <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono text-[10px]">Next.js</span>
-            <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono text-[10px]">Tailwind</span>
-            <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono text-[10px]">Supabase</span>
-          </div>
         </div>
 
         <div>
           <h4 className="text-sm font-semibold text-white mb-3">Kategori Produk</h4>
           <ul className="space-y-2 text-xs text-zinc-400">
-            <li><Link href="/?category=digital" className="hover:text-white transition">E-Book & Panduan Coding</Link></li>
-            <li><Link href="/?category=digital" className="hover:text-white transition">UI Kit & Design System Figma</Link></li>
-            <li><Link href="/?category=digital" className="hover:text-white transition">Lightroom Presets</Link></li>
-            <li><Link href="/?category=digital" className="hover:text-white transition">SaaS Starter Boilerplate</Link></li>
-            <li><Link href="/?category=physical" className="hover:text-white transition">Keyboard & Tech Gadget</Link></li>
-            <li><Link href="/?category=physical" className="hover:text-white transition">Developer Apparel & Tumbler</Link></li>
+            <li><Link href="/?category=digital" className="hover:text-white transition">E-Book & Panduan Praktis</Link></li>
+            <li><Link href="/?category=digital" className="hover:text-white transition">Template & Aset Digital</Link></li>
+            <li><Link href="/?category=physical" className="hover:text-white transition">Pakaian Nyaman (Fashion)</Link></li>
+            <li><Link href="/?category=physical" className="hover:text-white transition">Aksesoris & Kebutuhan Harian</Link></li>
+            <li><Link href="/" className="hover:text-white transition">Lainnya</Link></li>
           </ul>
         </div>
 
@@ -106,7 +99,7 @@ export const Footer: React.FC = () => {
             </li>
             <li className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span>Jakarta & Bandung, Indonesia</span>
+              <span>Banda Aceh, Aceh, Indonesia</span>
             </li>
           </ul>
         </div>

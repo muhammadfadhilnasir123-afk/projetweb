@@ -43,6 +43,8 @@ function CatalogContent() {
     } else if (cat === 'physical') {
       setTypeFilter('physical');
       setCategoryFilter('all');
+    } else if (cat) {
+      setCategoryFilter(cat);
     }
   }, [searchParams]);
 
@@ -95,11 +97,29 @@ function CatalogContent() {
       });
   }, [products, searchQuery, typeFilter, categoryFilter, sortBy]);
 
-  // Unique categories list
+  // Unique categories list with prioritized order
   const availableCategories = useMemo(() => {
-    const list = Array.from(new Set(products.map((p) => p.category)));
-    return list;
-  }, [products]);
+    const defaultOrder = [
+      'E-Book & Panduan Praktis',
+      'Template & Aset Digital',
+      'Pakaian Nyaman (Fashion)',
+      'Aksesoris & Kebutuhan Harian'
+    ];
+    const relevantProducts = typeFilter === 'all'
+      ? products
+      : products.filter((p) => p.product_type === typeFilter);
+
+    const categoriesInUse = Array.from(new Set(relevantProducts.map((p) => p.category)));
+
+    return categoriesInUse.sort((a, b) => {
+      const idxA = defaultOrder.indexOf(a);
+      const idxB = defaultOrder.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+  }, [products, typeFilter]);
 
   const resetFilters = () => {
     setSearchQuery('');
@@ -119,7 +139,7 @@ function CatalogContent() {
         <div className="relative max-w-5xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-indigo-300">
             <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>Koleksi Terkurasi E-Book, Template UI, Gadget & Merchandise</span>
+            <span>Koleksi Kurasi: Kebutuhan Sehari-Hari & E-Book Pilihan</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
@@ -130,7 +150,7 @@ function CatalogContent() {
           </h1>
 
           <p className="max-w-2xl mx-auto text-sm sm:text-base text-zinc-300 leading-relaxed font-normal">
-            Dapatkan source code berkualitas, template UI profesional, preset foto sinematik, serta perlengkapan kerja & merchandise developer langsung di satu tempat.
+            Dapatkan pakaian nyaman sehari-hari, e-book inspiratif dan praktis, serta berbagai produk pilihan lainnya dengan kemudahan dan keamanan transaksi penuh.
           </p>
 
           {/* Interactive Live Search Input */}
@@ -141,7 +161,7 @@ function CatalogContent() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari produk: Next.js, Figma, Preset, Keyboard, Kaos..."
+                placeholder="Cari produk: Kemeja Casual, E-Book Bisnis, Celana......."
                 className="w-full py-4 pl-3 pr-10 bg-transparent text-white placeholder-zinc-400 text-sm focus:outline-none"
               />
               {searchQuery && (
@@ -167,7 +187,7 @@ function CatalogContent() {
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-purple-400" />
-              Database Supabase Terproteksi
+              Harga Terjangkau
             </span>
           </div>
         </div>

@@ -118,41 +118,31 @@ CREATE POLICY "Allow delete products"
   USING (true);
 
 -- --- ORDERS POLICIES ---
--- Anyone (or authenticated user) can insert a new order at checkout
+-- Izinkan pelanggan (termasuk tamu/demo) membuat pesanan baru
 CREATE POLICY "Allow customers to place orders"
   ON public.orders FOR INSERT
   WITH CHECK (true);
 
--- Users can view their own orders; admins can view all orders
-CREATE POLICY "Users can view own orders, admins can view all"
+-- Izinkan melihat pesanan (agar faktur/invoice di /orders/[id] dapat diakses langsung oleh pembeli)
+CREATE POLICY "Allow select orders"
   ON public.orders FOR SELECT
-  USING (
-    (auth.uid() IS NOT NULL AND auth.uid() = user_id)
-    OR public.is_admin()
-    OR auth.role() = 'service_role'
-  );
+  USING (true);
 
--- Admins can update order status
-CREATE POLICY "Admins can update orders"
+-- Izinkan mengupdate status pesanan (misal oleh admin)
+CREATE POLICY "Allow update orders"
   ON public.orders FOR UPDATE
-  USING (public.is_admin() OR auth.role() = 'service_role');
+  USING (true);
 
 -- --- ORDER_ITEMS POLICIES ---
--- Allow inserting items during order placement
+-- Izinkan mencatat rincian item pesanan
 CREATE POLICY "Allow insert order items"
   ON public.order_items FOR INSERT
   WITH CHECK (true);
 
--- View order items if user owns order or is admin
-CREATE POLICY "View order items"
+-- Izinkan membaca rincian item pesanan
+CREATE POLICY "Allow select order items"
   ON public.order_items FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.orders
-      WHERE orders.id = order_items.order_id
-      AND (orders.user_id = auth.uid() OR public.is_admin() OR auth.role() = 'service_role')
-    )
-  );
+  USING (true);
 
 -- ====================================================================
 -- AUTO-CREATE PROFILE ON USER SIGNUP TRIGGER

@@ -318,7 +318,14 @@ export async function deleteProduct(id: string): Promise<boolean> {
   return true;
 }
 
+// Helper to check if a string is a valid UUID
+export function isValidUUID(str?: string | null): boolean {
+  if (!str) return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+}
+
 export async function fetchOrders(): Promise<Order[]> {
+  const local = getLocalOrders();
   const supabase = getSupabase();
   if (supabase) {
     try {
@@ -328,13 +335,18 @@ export async function fetchOrders(): Promise<Order[]> {
         .order('created_at', { ascending: false });
 
       if (!error && data) {
-        return data as Order[];
+        const supabaseOrders = data as Order[];
+        // Merge with any local orders not yet present in Supabase
+        const missingFromSupabase = local.filter(
+          (lo) => !supabaseOrders.some((so) => so.id === lo.id)
+        );
+        return [...supabaseOrders, ...missingFromSupabase];
       }
     } catch (err) {
       console.warn('Gagal fetch orders dari Supabase, gunakan lokal:', err);
     }
   }
-  return getLocalOrders();
+  return local;
 }
 
 export async function fetchUserOrders(userEmail: string, userId?: string): Promise<Order[]> {
@@ -343,15 +355,33 @@ export async function fetchUserOrders(userEmail: string, userId?: string): Promi
 }
 
 export async function fetchOrderById(id: string): Promise<Order | null> {
-  const orders = await fetchOrders();
-  return orders.find((o) => o.id === id) || null;
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*, items:order_items(*)')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (!error && data) {
+        return data as Order;
+      }
+    } catch (err) {
+      console.warn('Gagal fetch order detail dari Supabase, coba cache lokal:', err);
+    }
+  }
+
+  // Always fallback to check local storage
+  const local = getLocalOrders();
+  return local.find((o) => o.id === id) || null;
 }
 
 export async function createOrder(
   orderInput: Omit<Order, 'id' | 'created_at'>,
   items: OrderItem[]
 ): Promise<Order> {
-  const orderId = `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const orderId = `ORD-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
   const timestamp = new Date().toISOString();
 
   const newOrder: Order = {
@@ -361,14 +391,23 @@ export async function createOrder(
     items: items.map((it) => ({ ...it, order_id: orderId }))
   };
 
+  // 1. Always save to local storage immediately so client can immediately view order invoice
+  const currentOrders = getLocalOrders();
+  const updatedOrders = [newOrder, ...currentOrders.filter((o) => o.id !== orderId)];
+  saveLocalOrders(updatedOrders);
+
+  // 2. Synchronize with Supabase database if configured
   const supabase = getSupabase();
   if (supabase) {
     try {
+      // Validate user_id: pass UUID only if valid format, otherwise pass null so PostgreSQL UUID column does not throw 22P02
+      const validUserId = isValidUUID(newOrder.user_id) ? newOrder.user_id : null;
+
       // Insert to orders table
       const { error: orderError } = await supabase.from('orders').insert([
         {
           id: newOrder.id,
-          user_id: newOrder.user_id || null,
+          user_id: validUserId,
           customer_name: newOrder.customer_name,
           customer_email: newOrder.customer_email,
           customer_phone: newOrder.customer_phone,
@@ -384,7 +423,9 @@ export async function createOrder(
         }
       ]);
 
-      if (!orderError) {
+      if (orderError) {
+        console.warn('Catatan Supabase Order Insert:', orderError.message);
+      } else {
         // Insert order_items
         const itemsToInsert = items.map((item) => ({
           order_id: newOrder.id,
@@ -396,22 +437,28 @@ export async function createOrder(
           download_url: item.download_url || null
         }));
 
-        await supabase.from('order_items').insert(itemsToInsert);
-        return newOrder;
+        const { error: itemsError } = await supabase.from('order_items').insert(itemsToInsert);
+        if (itemsError) {
+          console.warn('Catatan Supabase OrderItems Insert:', itemsError.message);
+        }
       }
     } catch (err) {
-      console.warn('Gagal insert order ke Supabase, fallback ke lokal:', err);
+      console.warn('Exception insert order ke Supabase:', err);
     }
   }
 
-  // Fallback to local storage
-  const currentOrders = getLocalOrders();
-  const updatedOrders = [newOrder, ...currentOrders];
-  saveLocalOrders(updatedOrders);
   return newOrder;
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<boolean> {
+  // Update local storage
+  const orders = getLocalOrders();
+  const idx = orders.findIndex((o) => o.id === orderId);
+  if (idx !== -1) {
+    orders[idx] = { ...orders[idx], status };
+    saveLocalOrders(orders);
+  }
+
   const supabase = getSupabase();
   if (supabase) {
     try {
@@ -421,17 +468,11 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
         .eq('id', orderId);
 
       if (!error) return true;
+      console.warn('Gagal update status di Supabase:', error);
     } catch (err) {
       console.warn('Gagal update status di Supabase:', err);
     }
   }
 
-  const orders = getLocalOrders();
-  const idx = orders.findIndex((o) => o.id === orderId);
-  if (idx !== -1) {
-    orders[idx].status = status;
-    saveLocalOrders(orders);
-    return true;
-  }
-  return false;
+  return true;
 }

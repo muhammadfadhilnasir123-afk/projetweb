@@ -23,19 +23,24 @@ import {
 
 function OrderDetailContent() {
   const params = useParams();
+  const rawId = params?.id;
+  const orderId = typeof rawId === 'string' ? decodeURIComponent(rawId).trim() : (Array.isArray(rawId) ? decodeURIComponent(rawId[0]).trim() : '');
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadOrder() {
-      if (!params?.id) return;
+      if (!orderId) {
+        setIsLoading(false);
+        return;
+      }
       setIsLoading(true);
-      const data = await fetchOrderById(params.id as string);
+      const data = await fetchOrderById(orderId);
       setOrder(data);
       setIsLoading(false);
     }
     loadOrder();
-  }, [params?.id]);
+  }, [orderId]);
 
   if (isLoading) {
     return (
@@ -53,15 +58,28 @@ function OrderDetailContent() {
           Pesanan Tidak Ditemukan
         </h2>
         <p className="text-zinc-500 text-xs mt-2">
-          ID Pesanan tidak valid atau belum tercatat di database Supabase.
+          ID Pesanan <code className="bg-zinc-100 dark:bg-zinc-800 px-1 py-0.5 rounded font-mono">{orderId || '-'}</code> belum tercatat atau tidak dapat diakses.
         </p>
-        <Link
-          href="/"
-          className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 transition"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Kembali ke Beranda
-        </Link>
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href="/"
+            className="w-full sm:w-auto px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 transition"
+          >
+            Kembali ke Katalog
+          </Link>
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full sm:w-auto px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 transition"
+          >
+            Muat Ulang Halaman
+          </button>
+          <Link
+            href="/orders"
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 transition"
+          >
+            Lihat Riwayat Pesanan
+          </Link>
+        </div>
       </div>
     );
   }

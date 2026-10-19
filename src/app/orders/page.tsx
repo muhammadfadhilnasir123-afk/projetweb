@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function MyOrdersPage() {
-  const { user, isLoading: authLoading, loginAsDemo } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -63,12 +63,12 @@ export default function MyOrdersPage() {
           >
             Masuk ke Akun
           </Link>
-          <button
-            onClick={() => loginAsDemo('customer')}
-            className="w-full py-2.5 px-4 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-semibold transition"
+          <Link
+            href="/"
+            className="block w-full py-2.5 px-4 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-semibold transition"
           >
-            Gunakan Akun Demo Pembeli
-          </button>
+            Kembali ke Katalog Produk
+          </Link>
         </div>
       </div>
     );

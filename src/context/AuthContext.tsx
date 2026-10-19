@@ -12,7 +12,6 @@ interface AuthContextType {
   login: (email: string, password?: string) => Promise<{ success: boolean; error?: string }>;
   register: (email: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
-  loginAsDemo: (role: 'admin' | 'customer') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -80,11 +79,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      // Local storage fallback for demo
+      // Clean up legacy demo sessions and load local user if valid
       try {
         const stored = localStorage.getItem(LOCAL_STORAGE_USER_KEY);
         if (stored) {
-          setUser(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          if (parsed.id === 'demo-admin-id' || parsed.id === 'demo-buyer-id') {
+            localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
+            setUser(null);
+          } else {
+            setUser(parsed);
+          }
         }
       } catch (e) {
         console.error(e);
@@ -223,17 +228,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  const loginAsDemo = (role: 'admin' | 'customer') => {
-    const demoUser: UserProfile = {
-      id: role === 'admin' ? 'demo-admin-id' : 'demo-buyer-id',
-      email: role === 'admin' ? 'admin@fadhilstore.com' : 'fadhil.buyer@gmail.com',
-      full_name: role === 'admin' ? 'Fadhil (Store Admin)' : 'Fadhil Customer',
-      role
-    };
-    localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(demoUser));
-    setUser(demoUser);
-  };
-
   const isAdmin = user?.role === 'admin';
 
   return (
@@ -245,8 +239,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isSupabaseConnected: isSupabase,
         login,
         register,
-        logout,
-        loginAsDemo
+        logout
       }}
     >
       {children}

@@ -19,14 +19,13 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowRight,
-  ChevronLeft,
-  Sparkles
+  ChevronLeft
 } from 'lucide-react';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalItems, subtotal, clearCart, hasPhysicalItems, hasDigitalItems } = useCart();
-  const { user, isLoading: authLoading, loginAsDemo } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
   // Form states
   const [customerName, setCustomerName] = useState('');
@@ -89,13 +88,12 @@ export default function CheckoutPage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
 
-            <button
-              onClick={() => loginAsDemo('customer')}
+            <Link
+              href="/register?redirect=/checkout"
               className="w-full py-2.5 px-4 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-semibold flex items-center justify-center gap-2 transition"
             >
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <span>Gunakan Akun Demo Pembeli (Instan)</span>
-            </button>
+              <span>Belum Punya Akun? Daftar Baru</span>
+            </Link>
           </div>
         </div>
       </div>

@@ -9,7 +9,6 @@ import {
   Lock,
   Mail,
   ArrowRight,
-  Sparkles,
   AlertCircle,
   ShieldCheck,
   CheckCircle2
@@ -20,7 +19,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/';
 
-  const { login, loginAsDemo, isSupabaseConnected } = useAuth();
+  const { login, isSupabaseConnected } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -41,11 +40,6 @@ function LoginForm() {
     }
   };
 
-  const handleDemoLogin = (role: 'admin' | 'customer') => {
-    loginAsDemo(role);
-    router.push(role === 'admin' ? '/admin' : redirectPath);
-  };
-
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
@@ -60,30 +54,6 @@ function LoginForm() {
           <p className="text-xs text-zinc-500">
             Akses produk digital, lacak pesanan fisik, atau kelola katalog toko
           </p>
-        </div>
-
-        {/* Demo Quick Login Helper Card */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-200/80 dark:border-indigo-800/80 space-y-2.5">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900 dark:text-indigo-200">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Mode Uji Coba Cepat (1-Click Login):</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('customer')}
-              className="py-2 px-3 rounded-xl bg-white dark:bg-zinc-900 border border-indigo-200 dark:border-indigo-800 hover:border-indigo-500 text-zinc-800 dark:text-zinc-200 font-semibold shadow-sm transition"
-            >
-              👤 Masuk sbg <b>Pembeli</b>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('admin')}
-              className="py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm transition"
-            >
-              🛡️ Masuk sbg <b>Admin</b>
-            </button>
-          </div>
         </div>
 
         {/* Main Login Card */}

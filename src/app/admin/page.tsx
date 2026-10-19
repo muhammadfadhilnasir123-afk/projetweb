@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminPage() {
-  const { user, isAdmin, loginAsDemo } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'supabase'>('orders');
@@ -206,12 +206,12 @@ export default function AdminPage() {
           Halaman ini khusus untuk admin toko FadhilStore untuk mengelola inventaris produk dan pesanan pembeli.
         </p>
         <div className="space-y-3">
-          <button
-            onClick={() => loginAsDemo('admin')}
-            className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md"
+          <Link
+            href="/login?redirect=/admin"
+            className="block w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md"
           >
-            🛡️ Beralih ke Akun Demo Admin (1-Klik)
-          </button>
+            Masuk sebagai Administrator
+          </Link>
           <Link
             href="/"
             className="block w-full py-2.5 px-4 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-semibold transition"
@@ -659,12 +659,12 @@ export default function AdminPage() {
 
               <div className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-zinc-100 dark:bg-zinc-800">
                 <span className={`w-2 h-2 rounded-full ${isSupabaseConfigured() ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                <span>{isSupabaseConfigured() ? 'Supabase Aktif' : 'Demo Mode (Local Storage)'}</span>
+                <span>{isSupabaseConfigured() ? 'Supabase Aktif' : 'Penyimpanan Lokal'}</span>
               </div>
             </div>
 
             <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Aplikasi ini telah dirancang dengan arsitektur hibrida modern. Saat kredensial Supabase diatur di file <code>.env.local</code>, aplikasi secara otomatis membaca dan menulis langsung ke Supabase Auth, tabel <code>products</code>, <code>orders</code>, dan <code>order_items</code>. Jika belum dikonfigurasi, aplikasi tetap dapat digunakan secara interaktif via demo storage.
+              Aplikasi ini terhubung langsung ke Supabase Auth, tabel <code>products</code>, <code>orders</code>, dan <code>order_items</code>. Seluruh data disimpan dan disinkronkan secara aman.
             </p>
 
             <div className="space-y-3 pt-2 text-xs">

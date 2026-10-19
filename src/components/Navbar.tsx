@@ -6,7 +6,6 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import {
   ShoppingBag,
-  Sparkles,
   ShieldCheck,
   User,
   LogOut,
@@ -22,14 +21,13 @@ import {
 
 export const Navbar: React.FC = () => {
   const { totalItems, setIsCartDrawerOpen } = useCart();
-  const { user, isAdmin, logout, loginAsDemo } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDemoMenuOpen, setIsDemoMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/90 dark:bg-zinc-950/90 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors">
-      {/* Top Announcement & Supabase Indicator Bar */}
+      {/* Top Announcement Bar */}
       <div className="bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 text-white text-xs py-1.5 px-4">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -41,44 +39,12 @@ export const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-
-            {/* Quick Demo Switcher */}
-            <div className="relative">
-              <button
-                onClick={() => setIsDemoMenuOpen(!isDemoMenuOpen)}
-                className="text-[11px] bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-0.5 rounded flex items-center gap-1 transition"
-                title="Beralih cepat akun demo untuk pengujian"
-              >
-                <Sparkles className="w-3 h-3 text-amber-300" />
-                <span>Akun Demo</span>
-                <ChevronDown className="w-3 h-3" />
-              </button>
-
-              {isDemoMenuOpen && (
-                <div
-                  className="absolute right-0 mt-1 w-52 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 rounded-lg shadow-xl border border-zinc-200 dark:border-zinc-800 p-2 z-50 text-xs"
-                  onClick={() => setIsDemoMenuOpen(false)}
-                >
-                  <p className="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold px-2 py-1">
-                    Pilih Role Uji Coba:
-                  </p>
-                  <button
-                    onClick={() => loginAsDemo('customer')}
-                    className="w-full text-left px-2.5 py-1.5 rounded hover:bg-indigo-50 dark:hover:bg-zinc-800 flex items-center justify-between transition"
-                  >
-                    <span>Masuk sbg <b>Pembeli</b></span>
-                    {user?.role === 'customer' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
-                  </button>
-                  <button
-                    onClick={() => loginAsDemo('admin')}
-                    className="w-full text-left px-2.5 py-1.5 rounded hover:bg-indigo-50 dark:hover:bg-zinc-800 flex items-center justify-between text-indigo-600 dark:text-indigo-400 font-medium transition"
-                  >
-                    <span>Masuk sbg <b>Admin</b></span>
-                    {user?.role === 'admin' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
-                  </button>
-                </div>
-              )}
-            </div>
+            <Link
+              href="/"
+              className="text-[11px] text-zinc-300 hover:text-white transition"
+            >
+              FadhilStore Official
+            </Link>
           </div>
         </div>
       </div>

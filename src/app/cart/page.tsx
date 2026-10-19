@@ -16,8 +16,7 @@ import {
   Download,
   Package,
   ShieldCheck,
-  Lock,
-  Sparkles
+  Lock
 } from 'lucide-react';
 
 export default function CartPage() {
@@ -32,7 +31,7 @@ export default function CartPage() {
     hasPhysicalItems,
     hasDigitalItems
   } = useCart();
-  const { user, loginAsDemo } = useAuth();
+  const { user } = useAuth();
 
   const handleProceedToCheckout = () => {
     if (!user) {
@@ -105,13 +104,6 @@ export default function CartPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => loginAsDemo('customer')}
-              className="px-3 py-1.5 rounded-lg bg-amber-200/60 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 text-xs font-semibold hover:bg-amber-200 transition flex items-center gap-1"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              1-Click Demo Login
-            </button>
             <Link
               href="/login?redirect=/checkout"
               className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-sm"

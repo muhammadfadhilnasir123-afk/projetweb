@@ -238,18 +238,21 @@ export async function createProduct(productData: Omit<Product, 'id'>): Promise<P
 
   const supabase = getSupabase();
   if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .insert([newProduct])
-        .select()
-        .single();
+    const { data, error } = await supabase
+      .from('products')
+      .insert([newProduct])
+      .select()
+      .single();
 
-      if (!error && data) {
-        return data as Product;
-      }
-    } catch (err) {
-      console.warn('Gagal insert ke Supabase, simpan lokal:', err);
+    if (error) {
+      console.error('Gagal insert ke Supabase:', error);
+      throw new Error(`Supabase Error (${error.code || 'RLS'}): ${error.message}`);
+    }
+
+    if (data) {
+      const local = getLocalProducts();
+      saveLocalProducts([data as Product, ...local.filter((p) => p.id !== data.id)]);
+      return data as Product;
     }
   }
 
@@ -262,19 +265,23 @@ export async function createProduct(productData: Omit<Product, 'id'>): Promise<P
 export async function updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
   const supabase = getSupabase();
   if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+    const { data, error } = await supabase
+      .from('products')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
 
-      if (!error && data) {
-        return data as Product;
-      }
-    } catch (err) {
-      console.warn('Gagal update di Supabase, update lokal:', err);
+    if (error) {
+      console.error('Gagal update di Supabase:', error);
+      throw new Error(`Supabase Error (${error.code || 'RLS'}): ${error.message}`);
+    }
+
+    if (data) {
+      const local = getLocalProducts();
+      const updated = local.map((p) => (p.id === id ? (data as Product) : p));
+      saveLocalProducts(updated);
+      return data as Product;
     }
   }
 
@@ -290,16 +297,19 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
 export async function deleteProduct(id: string): Promise<boolean> {
   const supabase = getSupabase();
   if (supabase) {
-    try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
 
-      if (!error) return true;
-    } catch (err) {
-      console.warn('Gagal delete di Supabase, delete lokal:', err);
+    if (error) {
+      console.error('Gagal delete di Supabase:', error);
+      throw new Error(`Supabase Error (${error.code || 'RLS'}): ${error.message}`);
     }
+
+    const local = getLocalProducts();
+    saveLocalProducts(local.filter((p) => p.id !== id));
+    return true;
   }
 
   const local = getLocalProducts();

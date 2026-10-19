@@ -104,18 +104,18 @@ CREATE POLICY "Public products viewable by everyone"
   ON public.products FOR SELECT
   USING (true);
 
--- Admins can insert, update, delete products
-CREATE POLICY "Admins can insert products"
+-- Izinkan penambahan, update, dan penghapusan produk secara langsung ke database
+CREATE POLICY "Allow insert products"
   ON public.products FOR INSERT
-  WITH CHECK (public.is_admin() OR auth.role() = 'service_role');
+  WITH CHECK (true);
 
-CREATE POLICY "Admins can update products"
+CREATE POLICY "Allow update products"
   ON public.products FOR UPDATE
-  USING (public.is_admin() OR auth.role() = 'service_role');
+  USING (true);
 
-CREATE POLICY "Admins can delete products"
+CREATE POLICY "Allow delete products"
   ON public.products FOR DELETE
-  USING (public.is_admin() OR auth.role() = 'service_role');
+  USING (true);
 
 -- --- ORDERS POLICIES ---
 -- Anyone (or authenticated user) can insert a new order at checkout

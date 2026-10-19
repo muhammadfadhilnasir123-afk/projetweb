@@ -101,27 +101,39 @@ export default function AdminPage() {
 
   // Save product (create or update)
   const handleSaveProduct = async (productData: Omit<Product, 'id'> | Product) => {
-    if ('id' in productData && productData.id) {
-      const updated = await updateProduct(productData.id, productData);
-      if (updated) {
-        setProducts((prev) =>
-          prev.map((p) => (p.id === updated.id ? updated : p))
-        );
-        showToast(`Produk "${updated.title}" berhasil diperbarui`);
+    try {
+      if ('id' in productData && productData.id) {
+        const updated = await updateProduct(productData.id, productData);
+        if (updated) {
+          setProducts((prev) =>
+            prev.map((p) => (p.id === updated.id ? updated : p))
+          );
+          showToast(`✅ Produk "${updated.title}" berhasil diperbarui di database!`);
+        }
+      } else {
+        const created = await createProduct(productData as Omit<Product, 'id'>);
+        setProducts((prev) => [created, ...prev]);
+        showToast(`✅ Produk baru "${created.title}" berhasil disimpan permanen ke Supabase!`);
       }
-    } else {
-      const created = await createProduct(productData as Omit<Product, 'id'>);
-      setProducts((prev) => [created, ...prev]);
-      showToast(`Produk baru "${created.title}" berhasil ditambahkan`);
+    } catch (err: any) {
+      console.error(err);
+      alert(`⚠️ GAGAL MENYIMPAN KE SUPABASE:\n\n${err.message}\n\nSilakan periksa RLS Policy di Supabase Anda agar mengizinkan INSERT ke tabel 'products'.`);
+      showToast(`❌ Gagal simpan: ${err.message}`);
     }
   };
 
   // Delete product handler
   const handleDeleteProduct = async (id: string, title: string) => {
     if (confirm(`Apakah Anda yakin ingin menghapus produk "${title}"?`)) {
-      await deleteProduct(id);
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-      showToast(`Produk "${title}" berhasil dihapus`);
+      try {
+        await deleteProduct(id);
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+        showToast(`✅ Produk "${title}" berhasil dihapus dari database!`);
+      } catch (err: any) {
+        console.error(err);
+        alert(`⚠️ Gagal menghapus dari Supabase:\n\n${err.message}`);
+        showToast(`❌ Gagal hapus: ${err.message}`);
+      }
     }
   };
 
